@@ -24,8 +24,6 @@ class Facebook
     public function __construct($config) 
     {
 	$this->config = $config;
-	$this->graph = new Graph\Graph();
-	$this->signedData = $this->acquireSignedData();
     }
     
     public function getAccessToken($code, $callbackUri = null)
@@ -41,13 +39,13 @@ class Facebook
 	return $response;
     }
     
-    private function acquireSignedData()
+    public function acquireSignedData($post)
     {
-        $post = $_POST;
         if(isset($post['signed_request']))
         {
             return $this->parseSignedRequest($post['signed_request'], $this->config->getAppSecret());
         } 
+        return null;
     }
     
     private function parseSignedRequest($signedRequest, $secret)
@@ -101,7 +99,24 @@ class Facebook
      */
     public function getGraph()
     {
+        if($this->graph === null)
+        {
+            $this->graph = new Graph\Graph();
+        }
 	return $this->graph->setAccessToken($this->accessToken);
+    }
+    
+    /**
+     *
+     * @return Facebook\FQL
+     */
+    public function getFql()
+    {
+        if($this->fql === null)
+        {
+            $this->fql = new FQL;
+        }
+	return $this->fql;
     }
     
     /**
@@ -140,12 +155,6 @@ class Facebook
 	    return null;
 	}
 	$this->accessToken = $args['access_token'];
-	var_dump($args);exit;
-	if($this->user == null)
-	{
-	    $this->user = new User;
-	    $this->user->setId($args['uid']);
-	}
 	return $args;
     }
     
@@ -155,5 +164,17 @@ class Facebook
 	return $this;
     }
     
+    public function __get($property)
+    {
+        switch($property)
+        {
+            case 'graph':
+                return $this->getGraph();
+                break;
+            
+            default:
+                throw new \ErrorException(sprintf('Can\'t access property %s', $property));
+        }
+    }
 }
 

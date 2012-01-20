@@ -34,8 +34,6 @@ class Graph
 	$response = $this->client->setRequest($request)->send();
 	return $response;
     }
-
-    
     
     public function setAccessToken($accessToken)
     {
@@ -45,8 +43,13 @@ class Graph
     
     public function getUserInfo()
     {
+	return $this->query('me');
+    }
+    
+    public function query($query)
+    {
 	$request = new Request;
-	$request->setObject('me');
+	$request->setObject($query);
 	$arguments = array(
 	    'access_token' => $this->accessToken
 	);
@@ -54,10 +57,10 @@ class Graph
 	return $this->client->setRequest($request)->send();
     }
     
-    public function query($query)
+    public function fql($query)
     {
-	$request = new Request;
-	$request->setObject($query);
+        $request = new Request;
+	$request->setObject('fql?q='.$query);
 	$arguments = array(
 	    'access_token' => $this->accessToken
 	);
@@ -75,7 +78,7 @@ class Graph
 	
     }
     
-    public function search($query)
+    public function search($query, $objectType)
     {
 	
     }
