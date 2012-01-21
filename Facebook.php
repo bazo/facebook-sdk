@@ -12,7 +12,12 @@ class Facebook
 	/** @var Graph\Graph */
 	$graph,
 	$accessToken = null,    
-	$signedData
+	$signedData,
+            
+        $appId,
+            
+        $appSecret,
+        $canvasUrl
     ;
     
     /**
@@ -21,34 +26,26 @@ class Facebook
      * @param Session $session
      * @param User $user 
      */
-    public function __construct($config) 
+    public function __construct($appId, $appSecret, $canvasUrl = null) 
     {
-	$this->config = $config;
+        $this->appId = $appId;
+        $this->appSecret = $appSecret;
+        $this->canvasUrl = $canvasUrl;
     }
     
     public function getAccessToken($code, $callbackUri = null)
     {
 	if($callbackUri == null)
 	{
-	    $callbackUri = $this->config->getCanvasUrl();
+	    $callbackUri = $this->canvasUrl;
 	}
 	
-	$response = $this->graph->getAccessToken($this->config->getAppId(), $this->config->getAppSecret(), 
-	    $code, $callbackUri);
+	$response = $this->graph->getAccessToken($this->appId, $this->appSecret, $code, $callbackUri);
 	
 	return $response;
     }
     
-    public function acquireSignedData($post)
-    {
-        if(isset($post['signed_request']))
-        {
-            return $this->parseSignedRequest($post['signed_request'], $this->config->getAppSecret());
-        } 
-        return null;
-    }
-    
-    private function parseSignedRequest($signedRequest, $secret)
+    public function parseSignedRequest($signedRequest)
     {
 	list($encodedSig, $payload) = explode('.', $signedRequest, 2); 
 
@@ -56,15 +53,18 @@ class Facebook
 	$sig = $this->base64UrlDecode($encodedSig);
 	$data = json_decode($this->base64UrlDecode($payload), true);
 
-	if (strtoupper($data['algorithm']) !== 'HMAC-SHA256') {
+	if (strtoupper($data['algorithm']) !== 'HMAC-SHA256') 
+        {
 	    throw new Exception('Unknown algorithm. Expected HMAC-SHA256');
 	}
 	// check sig
-	$expectedSig = hash_hmac('sha256', $payload, $secret, $raw = true);
-	if ($sig !== $expectedSig) {
+	$expectedSig = hash_hmac('sha256', $payload, $this->appSecret, $raw = true);
+	if ($sig !== $expectedSig) 
+        {
 	    throw new Exception('Bad Signed JSON signature!');
 	}
-	return $data;
+        $this->signedData = $data;
+	return $this->signedData;
     }
     
     /**
@@ -82,15 +82,9 @@ class Facebook
 	return $this->signedData;
     }
     
-    /**
-     *
-     * @return Facebook\User
-     */
     public function getUserInfo()
     {
-	$graphData = null;
-	$graphData = $this->graph->setAccessToken($this->accessToken)->getUserInfo();
-	return $graphData;
+	return $this->getGraph()->getUserInfo();
     }
     
     /**
@@ -108,19 +102,6 @@ class Facebook
     
     /**
      *
-     * @return Facebook\FQL
-     */
-    public function getFql()
-    {
-        if($this->fql === null)
-        {
-            $this->fql = new FQL;
-        }
-	return $this->fql;
-    }
-    
-    /**
-     *
      * @param string $redirectUrl
      * @return OAuthDialog 
      */
@@ -130,17 +111,17 @@ class Facebook
 	{
 	    $redirectUrl = $this->config->getCanvasPage();
 	}
-        return new OAuthDialog($this->config->getAppId(), $redirectUrl);
+        return new OAuthDialog($this->appId, $redirectUrl);
     }
     
     public function readCookie()
     {
 	$args = array();
-	if(!isset($_COOKIE['fbs_' . $this->config->getAppId()]))
+	if(!isset($_COOKIE['fbs_' . $this->appId]))
 	{
 	    return null;
 	}
-	parse_str(trim($_COOKIE['fbs_' . $this->config->getAppId()], '\\"'), $args);
+	parse_str(trim($_COOKIE['fbs_' . $this->appId], '\\"'), $args);
 	ksort($args);
 	$payload = '';
 	foreach ($args as $key => $value) 
@@ -150,7 +131,7 @@ class Facebook
 		$payload .= $key . '=' . $value;
 	    }
 	}
-	if (md5($payload . $this->config->getAppSecret()) != $args['sig']) 
+	if (md5($payload . $this->appSecret) != $args['sig']) 
 	{
 	    return null;
 	}
@@ -177,4 +158,3 @@ class Facebook
         }
     }
 }
-
