@@ -40,7 +40,7 @@ class Facebook
 	    $callbackUri = $this->canvasUrl;
 	}
 	
-	$response = $this->graph->getAccessToken($this->appId, $this->appSecret, $code, $callbackUri);
+	$response = $this->getGraph()->getAccessToken($this->appId, $this->appSecret, $code, $callbackUri);
 	
 	return $response;
     }
