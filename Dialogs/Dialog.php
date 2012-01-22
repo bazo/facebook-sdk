@@ -17,11 +17,10 @@ abstract class Dialog implements IDialog
     ;
 
 
-    public function __construct($appId, $redirectUrl, $display = 'page', $accessToken = null, $showError = false)
+    public function __construct($appId, $redirectUrl, $accessToken = null, $showError = false)
     {
 	$this->appId = $appId;
         $this->redirectUrl = $redirectUrl;
-        $this->display = $display;
         $this->accessToken = $accessToken;
     }
     
@@ -42,8 +41,9 @@ abstract class Dialog implements IDialog
         return $this->baseUrl.$this->type.'?'.$query;
     }
     
-    public function show()
+    public function show($display = 'page')
     {
+	$this->display = $display;
 	$response = new Responses\DialogResponse($this->constructUrl());
         $response->send();
 	$response->finish();
