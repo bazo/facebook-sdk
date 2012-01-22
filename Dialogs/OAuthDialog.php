@@ -21,12 +21,7 @@ class OAuthDialog extends Dialog implements IDialog
     
     protected function getQueryData()
     {
-        $data = array(
-            'client_id' => $this->appId,
-            'redirect_uri' => $this->redirectUrl,
-            'display' => $this->display,
-            //'response_type' => 'token'
-        );
+        $data = parent::getQueryData();
 	
 	if(!empty($this->permissions))
 	{

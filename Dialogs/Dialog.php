@@ -7,17 +7,27 @@ namespace Facebook;
  */
 abstract class Dialog implements IDialog
 {
+    
+    const
+	PAGE = 'page',
+	POPUP = 'popup',
+	IFRAME = 'iframe',
+	TOUCH = 'touch',
+	WAP = 'wap'
+    ;
+    
     protected 
 	$baseUrl = 'https://www.facebook.com/dialog/',
 	$type,
         $appId,
         $redirectUrl,
         $display,
-        $accessToken
+        $accessToken,
+	$showError
     ;
 
 
-    public function __construct($appId, $redirectUrl, $accessToken = null, $showError = false)
+    public function __construct($appId, $redirectUrl, $accessToken = null)
     {
 	$this->appId = $appId;
         $this->redirectUrl = $redirectUrl;
@@ -30,6 +40,7 @@ abstract class Dialog implements IDialog
             'app_id' => $this->appId,
             'redirect_uri' => $this->redirectUrl,
             'display' => $this->display,
+	    'show_error' => $this->showError
         );
         
         return $data;
@@ -41,9 +52,12 @@ abstract class Dialog implements IDialog
         return $this->baseUrl.$this->type.'?'.$query;
     }
     
-    public function show($display = 'page')
+    
+    
+    public function show($display = 'page', $showError = false)
     {
 	$this->display = $display;
+	$this->showError = $showError;
 	$response = new Responses\DialogResponse($this->constructUrl());
         $response->send();
 	$response->finish();
