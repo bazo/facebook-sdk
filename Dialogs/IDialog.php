@@ -1,5 +1,5 @@
 <?php
-namespace Facebook;
+namespace Facebook\Dialogs;
 /**
  *
  * @author Martin

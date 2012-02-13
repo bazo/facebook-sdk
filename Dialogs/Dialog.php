@@ -1,5 +1,6 @@
 <?php
-namespace Facebook;
+namespace Facebook\Dialogs;
+
 /**
  * Description of Dialog
  *
@@ -7,59 +8,76 @@ namespace Facebook;
  */
 abstract class Dialog implements IDialog
 {
-    
-    const
-	PAGE = 'page',
-	POPUP = 'popup',
-	IFRAME = 'iframe',
-	TOUCH = 'touch',
-	WAP = 'wap'
-    ;
-    
-    protected 
-	$baseUrl = 'https://www.facebook.com/dialog/',
-	$type,
-        $appId,
-        $redirectUrl,
-        $display,
-        $accessToken,
-	$showError
-    ;
 
+	const
+		PAGE = 'page',
+		POPUP = 'popup',
+		IFRAME = 'iframe',
+		TOUCH = 'touch',
+		WAP = 'wap'
+	;
 
-    public function __construct($appId, $redirectUrl, $accessToken = null)
-    {
-	$this->appId = $appId;
-        $this->redirectUrl = $redirectUrl;
-        $this->accessToken = $accessToken;
-    }
-    
-    protected function getQueryData()
-    {
-        $data = array(
-            'app_id' => $this->appId,
-            'redirect_uri' => $this->redirectUrl,
-            'display' => $this->display,
-	    'show_error' => $this->showError
-        );
-        
-        return $data;
-    }
+	protected
+		$baseUrl = 'https://www.facebook.com/dialog/',
+		$type,
+		$appId,
+		$redirectUrl,
+		$display,
+		$accessToken,
+		$showError
+	;
 
-    protected function constructUrl()
-    {
-        $query = http_build_query($this->getQueryData());
-        return $this->baseUrl.$this->type.'?'.$query;
-    }
-    
-    
-    
-    public function show($display = 'page', $showError = false)
-    {
-	$this->display = $display;
-	$this->showError = $showError;
-	$response = new Responses\DialogResponse($this->constructUrl());
-        $response->send();
-	$response->finish();
-    }
+	/**
+	 *
+	 * @param string $appId
+	 * @param string $redirectUrl
+	 * @param string $accessToken 
+	 */
+	public function __construct($appId, $redirectUrl, $accessToken = null)
+	{
+		$this->appId = $appId;
+		$this->redirectUrl = $redirectUrl;
+		$this->accessToken = $accessToken;
+	}
+
+	protected function getQueryData()
+	{
+		$data = array(
+			'app_id' => $this->appId,
+			'redirect_uri' => $this->redirectUrl,
+			'show_error' => $this->showError
+		);
+
+		if($this->display !== null)
+		{
+			$data['display'] = $this->display;
+		}
+		
+		return $data;
+	}
+
+	protected function constructUrl()
+	{
+		$query = http_build_query($this->getQueryData());
+		return $this->baseUrl . $this->type . '?' . $query;
+	}
+
+	/**
+	 * Shows the dialog
+	 * @param type $display
+	 * @param type $showError 
+	 */
+	public function show($display = null, $showError = false)
+	{
+		$this->display = $display;
+		$this->showError = $showError;
+		$response = new \Facebook\Responses\DialogResponse($this->constructUrl());
+		$response->send();
+		$response->finish();
+	}
+
+	public function getUrl()
+	{
+		return $this->constructUrl();
+	}
 }
