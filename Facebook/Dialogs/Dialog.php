@@ -43,7 +43,7 @@ abstract class Dialog implements IDialog
 	protected function getQueryData()
 	{
 		$data = array(
-			'app_id' => $this->appId,
+			'client_id' => $this->appId,
 			'redirect_uri' => $this->redirectUrl,
 			'show_error' => $this->showError
 		);
