@@ -1,38 +1,59 @@
 <?php
+
 namespace Facebook\Graph;
+
 use Facebook\Exception;
+
 /**
  * Description of Response
  *
  * @author Martin
  */
-class Response 
+class Response
 {
-    public function __construct($responseString)
-    {
-	$decoded = json_decode($responseString);
-	if($decoded == null)
+
+	public function __construct($responseString)
 	{
-	    parse_str($responseString, $vars);
-	    foreach ($vars as $property => $value)
-	    {
-		$this->$property = $value;
-	    }
-	}
-	else
-	{
-	    if(isset($decoded->error))
-	    {
-		$message = $decoded->error->type.': '.$decoded->error->message;
-		throw new Exception($message);
-	    }
-	    else
-	    {
-		foreach($decoded as $property => $value)
+		$decoded = json_decode($responseString);
+		if($decoded == null)
 		{
-		    $this->$property = $value;
+			parse_str($responseString, $vars);
+			foreach($vars as $property => $value)
+			{
+				$this->$property = $value;
+			}
 		}
-	    }
+		else
+		{
+			if(isset($decoded->error))
+			{
+				$message = $decoded->error->type . ': ' . $decoded->error->message;
+				throw new Exception($message);
+			}
+			else
+			{
+				foreach($decoded as $property => $value)
+				{
+					$this->$property = $value;
+				}
+			}
+		}
 	}
-    }
+	
+	public function __get($property)
+	{
+		if(!isset($this->$property))
+		{
+			return null;
+		}
+		return $this->$property;
+	}
+	
+	public function __set($property, $value)
+	{
+		throw new Exception(sprintf('Class %s is read-only.', get_class($this)));
+	}
+	
+	
+
 }
