@@ -8,4 +8,8 @@ namespace Facebook\Responses;
  */
 abstract class Response 
 {
+	protected
+		$frozen = false
+	;
+	
 }

@@ -9,7 +9,7 @@ use Facebook\Exception;
  *
  * @author Martin
  */
-class Response
+class Response extends \Facebook\Responses\Response
 {
 
 	public function __construct($responseString)
@@ -38,6 +38,7 @@ class Response
 				}
 			}
 		}
+		$this->frozen = true;
 	}
 	
 	public function __get($property)
@@ -51,9 +52,9 @@ class Response
 	
 	public function __set($property, $value)
 	{
-		throw new Exception(sprintf('Class %s is read-only.', get_class($this)));
+		if($this->frozen)
+		{
+			throw new Exception(sprintf('Class %s is read-only.', get_class($this)));
+		}
 	}
-	
-	
-
 }
