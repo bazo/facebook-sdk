@@ -52,9 +52,13 @@ class Response extends \Facebook\Responses\Response
 	
 	public function __set($property, $value)
 	{
-		if($this->frozen)
+		if($this->frozen === true)
 		{
 			throw new Exception(sprintf('Class %s is read-only.', get_class($this)));
+		}
+		else
+		{
+			$this->$property = $value;
 		}
 	}
 }

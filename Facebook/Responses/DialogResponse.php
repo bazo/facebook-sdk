@@ -29,6 +29,6 @@ class DialogResponse extends Response
     
     public function finish()
     {
-	exit;
+		exit;
     }
 }

@@ -22,10 +22,9 @@ class Facebook
 	;
 
 	/**
-	 *
-	 * @param Config $config
-	 * @param Session $session
-	 * @param User $user 
+	 * @param type $appId
+	 * @param type $appSecret
+	 * @param type $canvasUrl 
 	 */
 	public function __construct($appId, $appSecret, $canvasUrl = null)
 	{
