@@ -45,6 +45,10 @@ class Client
 		\curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		\curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/fb_ca_chain_bundle.crt');
 		$responseString = curl_exec($ch);
+		$error = curl_error($ch);
+		if($error !== '') {
+			throw new \Facebook\Exception($error);
+		}
 		\curl_close($ch);
 		return new Response($responseString);
 	}
